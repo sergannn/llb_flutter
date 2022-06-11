@@ -7,7 +7,9 @@ class VideoCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Column(
+    print(video);
+    var t_date = video["date"] ?? video["updated_at"];
+     return new Column(
       children: <Widget>[
         new Container(
           padding: new EdgeInsets.all(8.0),
@@ -22,7 +24,7 @@ class VideoCell extends StatelessWidget {
                 video["name"]
               ),
               new Text(
-                video["date"]
+                  t_date
               )
             ],
           ),

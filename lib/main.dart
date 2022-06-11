@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'views/video_cell.dart';
-import 'home.dart';
+import 'llb_t_info.dart';
+import 'create_tournament.dart';
+import 'ch_t_info.dart';
 //import 'helpers/route.dart';
+//1jun
 const Color _colorOne = Color(0x33000000);
 const Color _colorTwo = Color(0x24000000);
 const Color _colorThree = Color(0x1F000000);
@@ -32,22 +35,29 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
   };
   var _isLoading = true;
   var icons;
+  var icons2;
   // final serTab =  detail().AppWithTab;
-  var videos;
+  var llbTourneys;
+  var chTourneys;
+  var allTourneys;
   var par = "next";
 
   _fetchData() async {
 
     print("Attempting to fetch data from network");
-
+    String password = '4ivkqNaDIX4EYlBMg2jPDEXetsm3KhQciinltHgN';
     final url = Uri.parse("http://1.u0156265.z8.ru/old/index.php?id=42&get="+par);
     final response = await http.get(url);
-
-    if (response.statusCode == 200) {
+    final url2 = Uri.parse(
+        "https://sergannn:"+password+"@api.challonge.com/v1/tournaments.json");
+    var response2 = await http.get(url2);
+    print(response.body);
+    if (response.statusCode == 200 || response2.statusCode==200) {
       // print(response.body);
-
+      final map2= json.decode(response2.body);
       final map = json.decode(response.body);
-      final videosJson = map["tourneys"];
+      final chTourneys = map2;
+      final llbTourneys = map["tourneys"];
 
       // videosJson.forEach((video) {
       //   print(video["name"]);
@@ -55,9 +65,12 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
 
       setState(() {
         _isLoading = false;
-        this.videos = videosJson;
+        this.llbTourneys = llbTourneys;
+        this.chTourneys = chTourneys;
+        this.allTourneys= llbTourneys + chTourneys;
       });
     }
+
   }
 
   @override
@@ -66,17 +79,60 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
     super.initState();
     _fetchData();
   }
+   ch_tourneys()
+   {
+     // print(this.videos.length);
 
-   tourneys() {
+     final Map<int, Widget> icons = <int, Widget>{
+       0: Center(child:
+       ListView.builder(
+         itemCount: this.chTourneys != null ? this.chTourneys
+             .length : 0,
+         itemBuilder: (context, i) {
+           final video = this.chTourneys[i];
+           return new FlatButton(
+               padding: new EdgeInsets.all(0.0),
+               child: new VideoCell(video["tournament"]),
+               onPressed: ()  {
+                 print("Video cell tapped: $i");
+                 if( video["tournament"]["id"]!=null) {
+
+                   Navigator.push(
+                       context,
+                       new MaterialPageRoute(
+                         builder: (context) => new ch_t_info(tdata: video["tournament"]["id"].toString(), tag: "ch"),
+                       ));
+                 }});
+         },
+       )
+       ),
+       1: Center(
+         child: FlutterLogo(
+           textColor: Colors.teal,
+           size: 200.0,
+         ),
+       ),
+       2: Center(
+         child: FlutterLogo(
+           textColor: Colors.cyan,
+           size: 200.0,
+         ),
+       ),
+     };
+     this.icons2 = icons;
+
+
+   }
+   llb_tourneys() {
        // print(this.videos.length);
 
      final Map<int, Widget> icons = <int, Widget>{
        0: Center(child:
        ListView.builder(
-         itemCount: this.videos != null ? this.videos
+         itemCount: this.llbTourneys != null ? this.llbTourneys
              .length : 0,
          itemBuilder: (context, i) {
-           final video = this.videos[i];
+           final video = this.llbTourneys[i];
            return new FlatButton(
              padding: new EdgeInsets.all(0.0),
              child: new VideoCell(video),
@@ -87,7 +143,7 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
                  Navigator.push(
                      context,
                      new MaterialPageRoute(
-                       builder: (context) => new Home(tdata: video["nid"]),
+                       builder: (context) => new llb_t_info(tdata: video["nid"], tag: "llb"),
                      ));
                }});
          },
@@ -113,7 +169,8 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
 
   @override
   Widget build(BuildContext context) {
-    tourneys();
+    llb_tourneys();
+    ch_tourneys();
     return new MaterialApp(
       home: new Scaffold(
         appBar: AppBar(
@@ -156,7 +213,22 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
              // child: this.icons[sharedValue],
               child: this.icons[0],
                 ),
+            Expanded(
+              child: this.icons2[0]
+            )
           ],
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.push(
+                context,
+                new MaterialPageRoute(
+                  builder: (context) => new FormWidgetsDemo(),
+                ));
+          },
+          label: const Text('Создать турнир'),
+         // icon: const Icon(Icons.thumb_up),
+          backgroundColor: Colors.pink,
         ),
       ),
     );

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:llb20/home.dart';
+import 'package:llb20/llb_t_info.dart';
 import '../main.dart';
 
 class RouteGenerator {

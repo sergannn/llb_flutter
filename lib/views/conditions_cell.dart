@@ -19,7 +19,8 @@ class ConditionsCell extends StatelessWidget {
                 height: 1.0,
               ),
               new Text(
-                condition.parent.text
+                condition
+                //condition.parent.text
               ),
             ],
           ),
